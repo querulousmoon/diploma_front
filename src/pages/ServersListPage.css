@@ -1,0 +1,125 @@
+.servers-list-page {
+  max-width: 1400px;
+}
+
+.servers-list-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.servers-list-page__title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.servers-list-page__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+}
+
+.servers-list-page__add-btn:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.servers-table {
+  width: 100%;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.servers-table__wrapper {
+  overflow-x: auto;
+}
+
+.servers-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.servers-table th {
+  text-align: left;
+  padding: 16px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-tertiary);
+}
+
+.servers-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.servers-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.servers-table tbody tr:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+.servers-table__name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.servers-table__host {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.servers-table__metrics {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.servers-table__metric {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+}
+
+.servers-table__empty {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.servers-table__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.servers-table__action-btn {
+  padding: 6px;
+  background-color: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.servers-table__action-btn:hover {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.servers-table__action-btn--delete:hover {
+  color: var(--color-error);
+}
