@@ -34,3 +34,7 @@ coverage
 
 # Build
 build
+
+# other
+*.txt
+*.md
