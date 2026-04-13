@@ -32,3 +32,13 @@
   background-color: rgba(6, 182, 212, 0.15);
   color: var(--color-info);
 }
+
+.badge--secondary {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.badge--critical {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--color-error);
+}

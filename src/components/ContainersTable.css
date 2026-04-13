@@ -1,0 +1,178 @@
+.containers-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.containers-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.containers-table-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.containers-refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.containers-refresh-btn:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.containers-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rotate-animation {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.containers-table-wrapper {
+  overflow-x: auto;
+}
+
+.containers-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.containers-table th,
+.containers-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.container-id {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.containers-table th {
+  background-color: var(--color-bg-secondary);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  position: sticky;
+  top: 0;
+}
+
+.sortable:hover {
+  color: var(--color-text-primary);
+}
+
+.sorted {
+  color: var(--color-primary);
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.sortable:hover {
+  color: var(--text-primary-color);
+}
+
+.sort-indicator {
+  font-size: 0.8em;
+}
+
+.sorted {
+  color: var(--primary-color);
+}
+
+.containers-table tbody tr:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.container-image {
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.metric-value {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.metric-unavailable {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.containers-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.container-name {
+  display: flex;
+  flex-direction: column;
+}
+
+.container-id {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary-color);
+}
+
+.container-full-name {
+  font-weight: 500;
+}
+
+.container-image {
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: var(--text-secondary-color);
+}
+
+.metric-value {
+  font-weight: 500;
+  color: var(--text-primary-color);
+}
+
+.metric-unavailable {
+  color: var(--text-muted-color);
+  font-style: italic;
+}
+
+.containers-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary-color);
+  font-style: italic;
+}

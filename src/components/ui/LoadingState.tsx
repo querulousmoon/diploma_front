@@ -1,4 +1,3 @@
-import { ReactNode } from 'react'
 import Spinner from './Spinner'
 import './LoadingState.css'
 

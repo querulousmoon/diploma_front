@@ -6,6 +6,7 @@ import ServersListPage from '@/pages/ServersListPage'
 import ServerDetailsPage from '@/pages/ServerDetailsPage'
 import CreateServerPage from '@/pages/CreateServerPage'
 import EditServerPage from '@/pages/EditServerPage'
+import AlertsPage from '@/pages/AlertsPage'
 import AppLayout from '@/components/layout/AppLayout'
 
 export default function AppRoutes() {
@@ -21,6 +22,7 @@ export default function AppRoutes() {
           <Route path="/servers/new" element={<CreateServerPage />} />
           <Route path="/servers/:id" element={<ServerDetailsPage />} />
           <Route path="/servers/:id/edit" element={<EditServerPage />} />
+          <Route path="/alerts" element={<AlertsPage />} />
         </Route>
       </Route>
 

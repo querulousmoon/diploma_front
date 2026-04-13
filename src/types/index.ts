@@ -16,7 +16,7 @@ export interface Server {
   connection_type: string
   environment: string | null
   tags: string[]
-  status: string
+  status: 'online' | 'offline' | 'warning' | 'unknown' | string
   last_seen: string | null
   created_at: string
   updated_at: string
@@ -73,6 +73,51 @@ export interface CreateServerInput {
 export interface LoginCredentials {
   email: string
   password: string
+}
+
+export interface ContainerMetrics extends Container {
+  cpu_percentage?: number | null
+  memory_usage_mb?: number | null
+  memory_percentage?: number | null
+  restart_count?: number | null
+  health_status?: string | null
+}
+
+export interface HistoricalMetric {
+  id: number
+  server_id: number
+  metric_type: string
+  aggregation_level: string
+  timestamp: string
+  period_start: string
+  value_min: number | null
+  value_max: number | null
+  value_avg: number | null
+  value_last: number | null
+  sample_count: number
+  collected_at: string
+}
+
+export interface Alert {
+  id: number
+  title: string
+  description: string | null
+  status: 'open' | 'acknowledged' | 'resolved'
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  rule_type: string
+  server_id: number | null
+  container_id: string | null
+  metric_type: string | null
+  threshold_value: string | null
+  current_value: string | null
+  metadata: Record<string, any>
+  acknowledged_at: string | null
+  acknowledged_by_user_id: number | null
+  resolved_at: string | null
+  first_triggered_at: string
+  last_triggered_at: string
+  created_at: string
+  updated_at: string
 }
 
 export interface ConnectionTestResult {

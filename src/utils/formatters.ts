@@ -1,6 +1,6 @@
 import type { Server } from '@/types'
 
-export function getStatusVariant(status: Server['status']): 'success' | 'warning' | 'error' {
+export function getStatusVariant(status: Server['status']): 'success' | 'warning' | 'error' | 'secondary' {
   switch (status) {
     case 'online':
       return 'success'
@@ -8,8 +8,10 @@ export function getStatusVariant(status: Server['status']): 'success' | 'warning
       return 'warning'
     case 'offline':
       return 'error'
+    case 'unknown':
+      return 'secondary'
     default:
-      return 'error'
+      return 'secondary'
   }
 }
 
@@ -21,8 +23,10 @@ export function getStatusLabel(status: Server['status']): string {
       return 'Warning'
     case 'offline':
       return 'Offline'
-    default:
+    case 'unknown':
       return 'Unknown'
+    default:
+      return status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown'
   }
 }
 

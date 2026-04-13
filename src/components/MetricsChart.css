@@ -1,0 +1,40 @@
+.metrics-chart-container {
+  width: 100%;
+  padding: 1rem;
+}
+
+.metrics-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.metrics-chart-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.metrics-chart-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.metrics-chart-select {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  min-width: 150px;
+}
+
+.metrics-chart-wrapper {
+  width: 100%;
+}

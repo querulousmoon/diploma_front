@@ -2,7 +2,7 @@ import './Badge.css'
 
 interface BadgeProps {
   children: React.ReactNode
-  variant?: 'success' | 'warning' | 'error' | 'info' | 'default'
+  variant?: 'success' | 'warning' | 'error' | 'info' | 'default' | 'secondary' | 'critical'
   className?: string
 }
 

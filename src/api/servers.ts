@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api-client'
-import type { Server, ServerDetails, CreateServerInput } from '@/types'
+import type { Server, CreateServerInput } from '@/types'
 
 interface ApiResponse<T> {
   success: boolean
@@ -47,24 +47,24 @@ export const serversApi = {
   },
 
   getLatestMetrics: async (serverId: number) => {
-    const response = await apiClient.get(`/servers/${serverId}/metrics/latest`)
+    const response = await apiClient.get<ApiResponse<any>>(`/servers/${serverId}/metrics/latest`)
     return response.data.data
   },
 
   getMetricsHistory: async (serverId: number, limit = 100) => {
-    const response = await apiClient.get(`/servers/${serverId}/metrics/history`, {
+    const response = await apiClient.get<ApiResponse<any>>(`/servers/${serverId}/metrics/history`, {
       params: { limit },
     })
     return response.data.data
   },
 
   getContainers: async (serverId: number) => {
-    const response = await apiClient.get(`/servers/${serverId}/containers`)
+    const response = await apiClient.get<ApiResponse<any>>(`/servers/${serverId}/containers`)
     return response.data.data
   },
 
   testConnection: async (serverId: number) => {
-    const response = await apiClient.post(`/connections/test/${serverId}`)
+    const response = await apiClient.post<ApiResponse<any>>(`/connections/test/${serverId}`)
     return response.data.data
   },
 }

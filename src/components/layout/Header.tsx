@@ -15,7 +15,7 @@ export default function Header() {
       <div className="header__user">
         <div className="header__user-info">
           <User size={18} />
-          <span>{user?.name || user?.email}</span>
+          <span>{user?.username || user?.email}</span>
         </div>
         <button onClick={handleLogout} className="header__logout" title="Logout">
           <LogOut size={18} />

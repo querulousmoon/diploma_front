@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Server, Activity } from 'lucide-react'
+import { LayoutDashboard, Server, AlertTriangle, Activity } from 'lucide-react'
 import './Sidebar.css'
 
 export default function Sidebar() {
@@ -18,6 +18,10 @@ export default function Sidebar() {
         <NavLink to="/servers" className="sidebar__link">
           <Server size={20} />
           <span>Servers</span>
+        </NavLink>
+        <NavLink to="/alerts" className="sidebar__link">
+          <AlertTriangle size={20} />
+          <span>Alerts</span>
         </NavLink>
       </nav>
     </aside>

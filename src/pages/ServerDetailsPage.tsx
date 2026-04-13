@@ -1,23 +1,36 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { serversApi } from '@/api/servers'
-import type { Server, ServerDetails, ServerMetrics, Container } from '@/types'
+import { alertsApi } from '@/api/alerts'
+import type { Server, ServerMetrics, Alert } from '@/types'
+import { ContainerMetrics } from '@/types'
 import { ArrowLeft, Edit2, Cpu, HardDrive, Network, Clock } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import LoadingState from '@/components/ui/LoadingState'
 import ErrorState from '@/components/ui/ErrorState'
+import { Tabs, Tab } from '@/components/ui/Tabs'
 import { getStatusVariant, getStatusLabel, getEnvironmentVariant, formatLastSeen, formatPercentage } from '@/utils/formatters'
 import './ServerDetailsPage.css'
+
+// Import the new components that we'll create
+import MetricsChart from '@/components/MetricsChart'
+import ContainersTable from '@/components/ContainersTable'
+import AlertsTable from '@/components/AlertsTable'
+import WebConsole from '@/components/WebConsole'
 
 export default function ServerDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState('overview')
   const [server, setServer] = useState<Server | null>(null)
   const [metrics, setMetrics] = useState<ServerMetrics | null>(null)
-  const [containers, setContainers] = useState<Container[]>([])
+  const [containers, setContainers] = useState<ContainerMetrics[]>([])
+  const [alerts, setAlerts] = useState<Alert[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [containersLoading, setContainersLoading] = useState(false)
+  const [alertsLoading, setAlertsLoading] = useState(false)
 
   const fetchServer = async () => {
     if (!id) return
@@ -26,15 +39,22 @@ export default function ServerDetailsPage() {
       setIsLoading(true)
       setError(null)
 
-      const [serverData, metricsData, containersData] = await Promise.all([
-        serversApi.getById(parseInt(id)),
-        serversApi.getLatestMetrics(parseInt(id)),
-        serversApi.getContainers(parseInt(id)),
-      ])
-
+      const serverData = await serversApi.getById(parseInt(id))
       setServer(serverData)
-      setMetrics(metricsData)
-      setContainers(containersData || [])
+
+      // Load initial data
+      const metricsPromise = serversApi.getLatestMetrics(parseInt(id))
+      const containersPromise = serversApi.getContainers(parseInt(id))
+      
+      const [metricsData, containersData] = await Promise.allSettled([metricsPromise, containersPromise])
+      
+      if (metricsData.status === 'fulfilled') {
+        setMetrics(metricsData.value)
+      }
+      
+      if (containersData.status === 'fulfilled') {
+        setContainers(containersData.value || [])
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail || err.response?.data?.message || 'Failed to load server details')
     } finally {
@@ -42,9 +62,50 @@ export default function ServerDetailsPage() {
     }
   }
 
+  // Separate loading functions for each tab to avoid blocking the UI
+  const loadAlerts = async () => {
+    if (!id) return
+    
+    setAlertsLoading(true)
+    try {
+      const data = await alertsApi.getAll({ 
+        server_id: parseInt(id),
+        limit: 50 
+      })
+      setAlerts(data.alerts)
+    } catch (err: any) {
+      console.error('Failed to load alerts:', err)
+    } finally {
+      setAlertsLoading(false)
+    }
+  }
+
+  const loadContainers = async () => {
+    if (!id) return
+    
+    setContainersLoading(true)
+    try {
+      const data = await serversApi.getContainers(parseInt(id))
+      setContainers(data || [])
+    } catch (err: any) {
+      console.error('Failed to load containers:', err)
+    } finally {
+      setContainersLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchServer()
   }, [id])
+
+  // Load data for the active tab when it changes
+  useEffect(() => {
+    if (activeTab === 'alerts' && alerts.length === 0) {
+      loadAlerts()
+    } else if (activeTab === 'containers' && containers.length === 0) {
+      loadContainers()
+    }
+  }, [activeTab])
 
   if (isLoading) {
     return <LoadingState message="Loading server details..." />
@@ -57,12 +118,12 @@ export default function ServerDetailsPage() {
   return (
     <div className="server-details-page">
       <div className="server-details-page__header">
-        <button 
-          onClick={() => navigate('/servers')}
+        <Link 
+          to='/servers'
           className="server-details-page__back-btn"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Link>
         <div className="server-details-page__header-content">
           <h1 className="server-details-page__title">{server.name}</h1>
           <div className="server-details-page__badges">
@@ -85,224 +146,219 @@ export default function ServerDetailsPage() {
         </button>
       </div>
 
-      <div className="server-details-page__info">
-        <Card>
-          <h2 className="server-details-page__section-title">Server Information</h2>
-          <div className="server-info-grid">
-            <div className="server-info-item">
-              <div className="server-info-item__label">Host</div>
-              <div className="server-info-item__value">{server.host}:{server.port}</div>
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+      >
+        {/* Overview Tab */}
+        <Tab value="overview" label="Overview">
+          <div className="server-details-tab-content">
+            <div className="server-details-page__info">
+              <Card>
+                <h2 className="server-details-page__section-title">Server Information</h2>
+                <div className="server-info-grid">
+                  <div className="server-info-item">
+                    <div className="server-info-item__label">Host</div>
+                    <div className="server-info-item__value">{server.host}:{server.port}</div>
+                  </div>
+                  <div className="server-info-item">
+                    <div className="server-info-item__label">Connection Type</div>
+                    <div className="server-info-item__value">{server.connection_type.toUpperCase()}</div>
+                  </div>
+                  <div className="server-info-item">
+                    <div className="server-info-item__label">Last Seen</div>
+                    <div className="server-info-item__value">
+                      <Clock size={14} style={{ display: 'inline', marginRight: 4 }} />
+                      {formatLastSeen(server.last_seen)}
+                    </div>
+                  </div>
+                  <div className="server-info-item">
+                    <div className="server-info-item__label">Tags</div>
+                    <div className="server-info-item__tags">
+                      {server.tags.length > 0 ? (
+                        server.tags.map(tag => (
+                          <Badge key={tag} variant="default">{tag}</Badge>
+                        ))
+                      ) : (
+                        <span className="server-info-item__empty">No tags</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </div>
-            <div className="server-info-item">
-              <div className="server-info-item__label">Connection Type</div>
-              <div className="server-info-item__value">{server.connection_type.toUpperCase()}</div>
-            </div>
-            <div className="server-info-item">
-              <div className="server-info-item__label">Last Seen</div>
-              <div className="server-info-item__value">
-                <Clock size={14} style={{ display: 'inline', marginRight: 4 }} />
-                {formatLastSeen(server.last_seen)}
-              </div>
-            </div>
-            <div className="server-info-item">
-              <div className="server-info-item__label">Tags</div>
-              <div className="server-info-item__tags">
-                {server.tags.length > 0 ? (
-                  server.tags.map(tag => (
-                    <Badge key={tag} variant="default">{tag}</Badge>
-                  ))
-                ) : (
-                  <span className="server-info-item__empty">No tags</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
 
-      {metrics && (
-        <div className="server-details-page__metrics">
-          <Card className="server-metric-card">
-            <div className="server-metric-card__header">
-              <div className="server-metric-card__icon server-metric-card__icon--cpu">
-                <Cpu size={24} />
-              </div>
-              <h3 className="server-metric-card__title">CPU Usage</h3>
-            </div>
-            <div className="server-metric-card__value">
-              {formatPercentage(metrics.cpu_usage_percent)}
-            </div>
-            <div className="server-metric-card__bar">
-              <div 
-                className="server-metric-card__bar-fill server-metric-card__bar-fill--cpu"
-                style={{ width: `${metrics.cpu_usage_percent ?? 0}%` }}
-              />
-            </div>
-            <div className="server-metric-card__details">
-              <div className="server-metric-card__detail">
-                <span>Load (1m):</span>
-                <strong>{metrics.load_average_1m?.toFixed(2) ?? 'N/A'}</strong>
-              </div>
-              <div className="server-metric-card__detail">
-                <span>Load (5m):</span>
-                <strong>{metrics.load_average_5m?.toFixed(2) ?? 'N/A'}</strong>
-              </div>
-              <div className="server-metric-card__detail">
-                <span>Load (15m):</span>
-                <strong>{metrics.load_average_15m?.toFixed(2) ?? 'N/A'}</strong>
-              </div>
-            </div>
-          </Card>
+            {metrics && (
+              <div className="server-details-page__metrics">
+                <Card className="server-metric-card">
+                  <div className="server-metric-card__header">
+                    <div className="server-metric-card__icon server-metric-card__icon--cpu">
+                      <Cpu size={24} />
+                    </div>
+                    <h3 className="server-metric-card__title">CPU Usage</h3>
+                  </div>
+                  <div className="server-metric-card__value">
+                    {formatPercentage(metrics.cpu_usage_percent)}
+                  </div>
+                  <div className="server-metric-card__bar">
+                    <div 
+                      className="server-metric-card__bar-fill server-metric-card__bar-fill--cpu"
+                      style={{ width: `${metrics.cpu_usage_percent ?? 0}%` }}
+                    />
+                  </div>
+                  <div className="server-metric-card__details">
+                    <div className="server-metric-card__detail">
+                      <span>Load (1m):</span>
+                      <strong>{metrics.load_average_1m?.toFixed(2) ?? 'N/A'}</strong>
+                    </div>
+                    <div className="server-metric-card__detail">
+                      <span>Load (5m):</span>
+                      <strong>{metrics.load_average_5m?.toFixed(2) ?? 'N/A'}</strong>
+                    </div>
+                    <div className="server-metric-card__detail">
+                      <span>Load (15m):</span>
+                      <strong>{metrics.load_average_15m?.toFixed(2) ?? 'N/A'}</strong>
+                    </div>
+                  </div>
+                </Card>
 
-          <Card className="server-metric-card">
-            <div className="server-metric-card__header">
-              <div className="server-metric-card__icon server-metric-card__icon--ram">
-                <HardDrive size={24} />
-              </div>
-              <h3 className="server-metric-card__title">Memory</h3>
-            </div>
-            <div className="server-metric-card__value">
-              {formatPercentage(metrics.memory_usage_percent)}
-            </div>
-            <div className="server-metric-card__bar">
-              <div 
-                className="server-metric-card__bar-fill server-metric-card__bar-fill--ram"
-                style={{ width: `${metrics.memory_usage_percent ?? 0}%` }}
-              />
-            </div>
-            <div className="server-metric-card__details">
-              <div className="server-metric-card__detail">
-                <span>Used:</span>
-                <strong>{metrics.memory_used_mb ? `${(metrics.memory_used_mb / 1024).toFixed(1)} GB` : 'N/A'}</strong>
-              </div>
-              <div className="server-metric-card__detail">
-                <span>Total:</span>
-                <strong>{metrics.memory_total_mb ? `${(metrics.memory_total_mb / 1024).toFixed(1)} GB` : 'N/A'}</strong>
-              </div>
-            </div>
-          </Card>
+                <Card className="server-metric-card">
+                  <div className="server-metric-card__header">
+                    <div className="server-metric-card__icon server-metric-card__icon--ram">
+                      <HardDrive size={24} />
+                    </div>
+                    <h3 className="server-metric-card__title">Memory</h3>
+                  </div>
+                  <div className="server-metric-card__value">
+                    {formatPercentage(metrics.memory_usage_percent)}
+                  </div>
+                  <div className="server-metric-card__bar">
+                    <div 
+                      className="server-metric-card__bar-fill server-metric-card__bar-fill--ram"
+                      style={{ width: `${metrics.memory_usage_percent ?? 0}%` }}
+                    />
+                  </div>
+                  <div className="server-metric-card__details">
+                    <div className="server-metric-card__detail">
+                      <span>Used:</span>
+                      <strong>{metrics.memory_used_mb ? `${(metrics.memory_used_mb / 1024).toFixed(1)} GB` : 'N/A'}</strong>
+                    </div>
+                    <div className="server-metric-card__detail">
+                      <span>Total:</span>
+                      <strong>{metrics.memory_total_mb ? `${(metrics.memory_total_mb / 1024).toFixed(1)} GB` : 'N/A'}</strong>
+                    </div>
+                  </div>
+                </Card>
 
-          <Card className="server-metric-card">
-            <div className="server-metric-card__header">
-              <div className="server-metric-card__icon server-metric-card__icon--disk">
-                <HardDrive size={24} />
-              </div>
-              <h3 className="server-metric-card__title">Disk</h3>
-            </div>
-            <div className="server-metric-card__value">
-              {formatPercentage(metrics.disk_usage_percent)}
-            </div>
-            <div className="server-metric-card__bar">
-              <div 
-                className="server-metric-card__bar-fill server-metric-card__bar-fill--disk"
-                style={{ width: `${metrics.disk_usage_percent ?? 0}%` }}
-              />
-            </div>
-            <div className="server-metric-card__details">
-              <div className="server-metric-card__detail">
-                <span>Used:</span>
-                <strong>{metrics.disk_used_gb ? `${metrics.disk_used_gb.toFixed(1)} GB` : 'N/A'}</strong>
-              </div>
-              <div className="server-metric-card__detail">
-                <span>Total:</span>
-                <strong>{metrics.disk_total_gb ? `${metrics.disk_total_gb.toFixed(1)} GB` : 'N/A'}</strong>
-              </div>
-            </div>
-          </Card>
+                <Card className="server-metric-card">
+                  <div className="server-metric-card__header">
+                    <div className="server-metric-card__icon server-metric-card__icon--disk">
+                      <HardDrive size={24} />
+                    </div>
+                    <h3 className="server-metric-card__title">Disk</h3>
+                  </div>
+                  <div className="server-metric-card__value">
+                    {formatPercentage(metrics.disk_usage_percent)}
+                  </div>
+                  <div className="server-metric-card__bar">
+                    <div 
+                      className="server-metric-card__bar-fill server-metric-card__bar-fill--disk"
+                      style={{ width: `${metrics.disk_usage_percent ?? 0}%` }}
+                    />
+                  </div>
+                  <div className="server-metric-card__details">
+                    <div className="server-metric-card__detail">
+                      <span>Used:</span>
+                      <strong>{metrics.disk_used_gb ? `${metrics.disk_used_gb.toFixed(1)} GB` : 'N/A'}</strong>
+                    </div>
+                    <div className="server-metric-card__detail">
+                      <span>Total:</span>
+                      <strong>{metrics.disk_total_gb ? `${metrics.disk_total_gb.toFixed(1)} GB` : 'N/A'}</strong>
+                    </div>
+                  </div>
+                </Card>
 
-          <Card className="server-metric-card">
-            <div className="server-metric-card__header">
-              <div className="server-metric-card__icon server-metric-card__icon--network">
-                <Network size={24} />
-              </div>
-              <h3 className="server-metric-card__title">Network</h3>
-            </div>
-            <div className="server-metric-card__network">
-              <div className="server-metric-card__network-item">
-                <span className="server-metric-card__network-label">In:</span>
-                <span className="server-metric-card__network-value">
-                  {metrics.network_in_bytes ? `${(metrics.network_in_bytes / 1024 / 1024).toFixed(2)} MB` : 'N/A'}
-                </span>
-              </div>
-              <div className="server-metric-card__network-item">
-                <span className="server-metric-card__network-label">Out:</span>
-                <span className="server-metric-card__network-value">
-                  {metrics.network_out_bytes ? `${(metrics.network_out_bytes / 1024 / 1024).toFixed(2)} MB` : 'N/A'}
-                </span>
-              </div>
-            </div>
-            {metrics.uptime_seconds && (
-              <div className="server-metric-card__uptime">
-                <span>Uptime:</span>
-                <strong>{Math.floor(metrics.uptime_seconds / 86400)}d {Math.floor((metrics.uptime_seconds % 86400) / 3600)}h</strong>
+                <Card className="server-metric-card">
+                  <div className="server-metric-card__header">
+                    <div className="server-metric-card__icon server-metric-card__icon--network">
+                      <Network size={24} />
+                    </div>
+                    <h3 className="server-metric-card__title">Network</h3>
+                  </div>
+                  <div className="server-metric-card__network">
+                    <div className="server-metric-card__network-item">
+                      <span className="server-metric-card__network-label">In:</span>
+                      <span className="server-metric-card__network-value">
+                        {metrics.network_in_bytes ? `${(metrics.network_in_bytes / 1024 / 1024).toFixed(2)} MB` : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="server-metric-card__network-item">
+                      <span className="server-metric-card__network-label">Out:</span>
+                      <span className="server-metric-card__network-value">
+                        {metrics.network_out_bytes ? `${(metrics.network_out_bytes / 1024 / 1024).toFixed(2)} MB` : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                  {metrics.uptime_seconds && (
+                    <div className="server-metric-card__uptime">
+                      <span>Uptime:</span>
+                      <strong>{Math.floor(metrics.uptime_seconds / 86400)}d {Math.floor((metrics.uptime_seconds % 86400) / 3600)}h</strong>
+                    </div>
+                  )}
+                </Card>
               </div>
             )}
-          </Card>
-        </div>
-      )}
 
-      {!metrics && (
-        <Card className="server-details-page__no-metrics">
-          <div className="no-metrics-content">
-            <Cpu size={48} />
-            <h3>No Metrics Available</h3>
-            <p>Metrics have not been collected yet for this server.</p>
+            {!metrics && (
+              <Card className="server-details-page__no-metrics">
+                <div className="no-metrics-content">
+                  <Cpu size={48} />
+                  <h3>No Metrics Available</h3>
+                  <p>Metrics have not been collected yet for this server.</p>
+                </div>
+              </Card>
+            )}
           </div>
-        </Card>
-      )}
+        </Tab>
 
-      <Card className="server-details-page__containers">
-        <h2 className="server-details-page__section-title">Containers</h2>
-        {containers.length === 0 ? (
-          <div className="server-containers-empty">No containers detected</div>
-        ) : (
-          <div className="server-containers-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Container ID</th>
-                  <th>Name</th>
-                  <th>Image</th>
-                  <th>Status</th>
-                  <th>Collected At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {containers.map((container) => (
-                  <tr key={container.id}>
-                    <td>
-                      <code className="server-container-id">{container.container_id}</code>
-                    </td>
-                    <td>
-                      <div className="server-container-name">{container.container_name}</div>
-                    </td>
-                    <td>
-                      <span className="server-container-image">{container.image || '—'}</span>
-                    </td>
-                    <td>
-                      {container.status ? (
-                        <Badge 
-                          variant={
-                            container.status === 'running' ? 'success' : 
-                            container.status === 'paused' ? 'warning' : 'error'
-                          }
-                        >
-                          {container.status}
-                        </Badge>
-                      ) : (
-                        <span>—</span>
-                      )}
-                    </td>
-                    <td className="server-container-collected">
-                      {new Date(container.collected_at).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Metrics Tab */}
+        <Tab value="metrics" label="Metrics">
+          <div className="server-details-tab-content">
+            <MetricsChart serverId={parseInt(id!)} />
           </div>
-        )}
-      </Card>
+        </Tab>
+
+        {/* Containers Tab */}
+        <Tab value="containers" label="Containers">
+          <div className="server-details-tab-content">
+            <ContainersTable 
+              serverId={parseInt(id!)} 
+              loading={containersLoading}
+              containers={containers}
+              onRefresh={loadContainers}
+            />
+          </div>
+        </Tab>
+
+        {/* Alerts Tab */}
+        <Tab value="alerts" label="Alerts">
+          <div className="server-details-tab-content">
+            <AlertsTable 
+              serverId={parseInt(id!)} 
+              loading={alertsLoading}
+              alerts={alerts}
+              onRefresh={loadAlerts}
+            />
+          </div>
+        </Tab>
+
+        {/* Console Tab */}
+        <Tab value="console" label="Console">
+          <div className="server-details-tab-content">
+            <WebConsole serverId={parseInt(id!)} serverName={server.name} />
+          </div>
+        </Tab>
+      </Tabs>
     </div>
   )
 }
