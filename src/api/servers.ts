@@ -64,7 +64,27 @@ export const serversApi = {
   },
 
   testConnection: async (serverId: number) => {
-    const response = await apiClient.post<ApiResponse<any>>(`/connections/test/${serverId}`)
+    const response = await apiClient.post(`/connections/test/${serverId}`)
+    return response.data.data
+  },
+
+  startContainer: async (serverId: number, containerId: string) => {
+    const response = await apiClient.post(`/servers/${serverId}/containers/${containerId}/start`)
+    return response.data.data
+  },
+
+  stopContainer: async (serverId: number, containerId: string) => {
+    const response = await apiClient.post(`/servers/${serverId}/containers/${containerId}/stop`)
+    return response.data.data
+  },
+
+  restartContainer: async (serverId: number, containerId: string) => {
+    const response = await apiClient.post(`/servers/${serverId}/containers/${containerId}/restart`)
+    return response.data.data
+  },
+
+  deleteContainer: async (serverId: number, containerId: string, force: boolean = false) => {
+    const response = await apiClient.delete(`/servers/${serverId}/containers/${containerId}?force=${force}`)
     return response.data.data
   },
 }

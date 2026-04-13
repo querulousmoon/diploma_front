@@ -15,7 +15,7 @@ import './ServerDetailsPage.css'
 
 // Import the new components that we'll create
 import MetricsChart from '@/components/MetricsChart'
-import ContainersTable from '@/components/ContainersTable'
+import ContainerList from '@/components/ContainerList'
 import AlertsTable from '@/components/AlertsTable'
 import WebConsole from '@/components/WebConsole'
 
@@ -25,11 +25,9 @@ export default function ServerDetailsPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [server, setServer] = useState<Server | null>(null)
   const [metrics, setMetrics] = useState<ServerMetrics | null>(null)
-  const [containers, setContainers] = useState<ContainerMetrics[]>([])
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [containersLoading, setContainersLoading] = useState(false)
   const [alertsLoading, setAlertsLoading] = useState(false)
 
   const fetchServer = async () => {
@@ -42,19 +40,9 @@ export default function ServerDetailsPage() {
       const serverData = await serversApi.getById(parseInt(id))
       setServer(serverData)
 
-      // Load initial data
-      const metricsPromise = serversApi.getLatestMetrics(parseInt(id))
-      const containersPromise = serversApi.getContainers(parseInt(id))
-      
-      const [metricsData, containersData] = await Promise.allSettled([metricsPromise, containersPromise])
-      
-      if (metricsData.status === 'fulfilled') {
-        setMetrics(metricsData.value)
-      }
-      
-      if (containersData.status === 'fulfilled') {
-        setContainers(containersData.value || [])
-      }
+      // Load initial metrics data only
+      const metricsData = await serversApi.getLatestMetrics(parseInt(id))
+      setMetrics(metricsData)
     } catch (err: any) {
       setError(err.response?.data?.detail || err.response?.data?.message || 'Failed to load server details')
     } finally {
@@ -80,20 +68,6 @@ export default function ServerDetailsPage() {
     }
   }
 
-  const loadContainers = async () => {
-    if (!id) return
-    
-    setContainersLoading(true)
-    try {
-      const data = await serversApi.getContainers(parseInt(id))
-      setContainers(data || [])
-    } catch (err: any) {
-      console.error('Failed to load containers:', err)
-    } finally {
-      setContainersLoading(false)
-    }
-  }
-
   useEffect(() => {
     fetchServer()
   }, [id])
@@ -102,8 +76,6 @@ export default function ServerDetailsPage() {
   useEffect(() => {
     if (activeTab === 'alerts' && alerts.length === 0) {
       loadAlerts()
-    } else if (activeTab === 'containers' && containers.length === 0) {
-      loadContainers()
     }
   }, [activeTab])
 
@@ -331,11 +303,8 @@ export default function ServerDetailsPage() {
         {/* Containers Tab */}
         <Tab value="containers" label="Containers">
           <div className="server-details-tab-content">
-            <ContainersTable 
+            <ContainerList 
               serverId={parseInt(id!)} 
-              loading={containersLoading}
-              containers={containers}
-              onRefresh={loadContainers}
             />
           </div>
         </Tab>

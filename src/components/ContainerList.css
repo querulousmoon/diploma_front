@@ -1,0 +1,255 @@
+.container-list-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.container-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.container-list-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.container-list-wrapper {
+  overflow-x: auto;
+}
+
+.container-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.container-list-table th,
+.container-list-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.container-list-table th {
+  background-color: var(--color-bg-tertiary);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  position: sticky;
+  top: 0;
+}
+
+.container-list-table tbody tr:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.container-name-cell {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.container-id {
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.container-image,
+.container-ports {
+  color: var(--color-text-secondary);
+}
+
+.container-actions-cell {
+  padding: 0.25rem 0.75rem;
+}
+
+.container-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.container-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.container-action-btn--start {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.container-action-btn--start:hover:not(:disabled) {
+  background-color: #0ea56d;
+}
+
+.container-action-btn--stop {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.container-action-btn--stop:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.container-action-btn--restart {
+  background-color: var(--color-info);
+  color: white;
+}
+
+.container-action-btn--restart:hover:not(:disabled) {
+  background-color: #0891b2;
+}
+
+.container-action-btn--delete {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.container-action-btn--delete:hover:not(:disabled) {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.container-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.delete-confirmation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.delete-confirmation-content {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.delete-confirmation-content h3 {
+  margin: 0 0 1rem 0;
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+}
+
+.delete-confirmation-content p {
+  margin: 0.5rem 0;
+  color: var(--color-text-secondary);
+}
+
+.delete-confirmation-options {
+  margin: 1rem 0;
+}
+
+.delete-confirmation-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.delete-confirmation-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-secondary {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-bg-secondary);
+}
+
+.btn-danger {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.metric-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-text-primary);
+}
+
+.metric-unavailable {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.health-cell {
+  min-width: 80px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .delete-confirmation-content {
+    margin: 1rem;
+    min-width: auto;
+    max-width: calc(100% - 2rem);
+  }
+  
+  .container-list-table {
+    font-size: 0.75rem;
+  }
+  
+  .container-list-table th,
+  .container-list-table td {
+    padding: 0.5rem;
+  }
+}

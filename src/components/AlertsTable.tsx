@@ -190,50 +190,50 @@ const AlertsTable = ({ serverId, alerts, loading, onRefresh }: AlertsTableProps)
           <table className="alerts-table">
             <thead>
               <tr>
-                <th 
-                  className={`sortable ${sortField === 'title' ? 'sorted' : ''}`}
-                  onClick={() => handleSort('title')}
-                >
-                  <span>Title</span>
-                  {sortField === 'title' && (
-                    <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                  )}
+                <th>
+                  <div className={`sortable ${sortField === 'title' ? 'sorted' : ''}`}
+                    onClick={() => handleSort('title')}>
+                    <span>Title</span>
+                    {sortField === 'title' && (
+                      <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
                 </th>
-                <th 
-                  className={`sortable ${sortField === 'severity' ? 'sorted' : ''}`}
-                  onClick={() => handleSort('severity')}
-                >
-                  <span>Severity</span>
-                  {sortField === 'severity' && (
-                    <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                  )}
+                <th>
+                  <div className={`sortable ${sortField === 'severity' ? 'sorted' : ''}`}
+                    onClick={() => handleSort('severity')}>
+                    <span>Severity</span>
+                    {sortField === 'severity' && (
+                      <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
                 </th>
-                <th 
-                  className={`sortable ${sortField === 'status' ? 'sorted' : ''}`}
-                  onClick={() => handleSort('status')}
-                >
-                  <span>Status</span>
-                  {sortField === 'status' && (
-                    <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                  )}
+                <th>
+                  <div className={`sortable ${sortField === 'status' ? 'sorted' : ''}`}
+                    onClick={() => handleSort('status')}>
+                    <span>Status</span>
+                    {sortField === 'status' && (
+                      <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
                 </th>
-                <th 
-                  className={`sortable ${sortField === 'last_triggered_at' ? 'sorted' : ''}`}
-                  onClick={() => handleSort('last_triggered_at')}
-                >
-                  <span>Last Triggered</span>
-                  {sortField === 'last_triggered_at' && (
-                    <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                  )}
+                <th>
+                  <div className={`sortable ${sortField === 'last_triggered_at' ? 'sorted' : ''}`}
+                    onClick={() => handleSort('last_triggered_at')}>
+                    <span>Last Triggered</span>
+                    {sortField === 'last_triggered_at' && (
+                      <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
                 </th>
-                <th 
-                  className={`sortable ${sortField === 'server_id' ? 'sorted' : ''}`}
-                  onClick={() => handleSort('server_id')}
-                >
-                  <span>Server</span>
-                  {sortField === 'server_id' && (
-                    <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                  )}
+                <th>
+                  <div className={`sortable ${sortField === 'server_id' ? 'sorted' : ''}`}
+                    onClick={() => handleSort('server_id')}>
+                    <span>Server</span>
+                    {sortField === 'server_id' && (
+                      <span className="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
                 </th>
                 <th>Actions</th>
               </tr>
